@@ -1,4 +1,4 @@
-import concurrent.futures
+how much time you estimate my code to be ran fully import concurrent.futures
 import time
 import pandas as pd
 import os
@@ -40,6 +40,8 @@ chrome_options.add_argument("--headless")  # Remove this option for debugging
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--blink-settings=imagesEnabled=false")
+# Uncomment if JavaScript needs to be enabled to load elements
+# chrome_options.add_argument("--disable-javascript")
 
 # Base URL pattern for room pages on Jabama
 base_url = "https://www.jabama.com/stay/apartment-"
@@ -56,12 +58,13 @@ def scrape_page(driver, page_num):
 
     # Wait for the comments section to be loaded
     try:
-        WebDriverWait(driver, 15).until(  # Reduced to 15 seconds
+        WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.comment-card__content p.comment-card__text"))
         )
     except TimeoutException:
         print(f"Timeout loading page {url}")
         return data
+
 
     # Extract location
     location = "N/A"
@@ -85,7 +88,7 @@ def scrape_page(driver, page_num):
     # Scroll the page to load all comments
     for _ in range(3):  # Adjust the number of scrolls as needed
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # Keep the sleep time at 2 seconds
+        time.sleep(2)  # Wait for content to load
 
     # Extract comments
     comments_containers = driver.find_elements(By.CSS_SELECTOR, "div.comment-card__content p.comment-card__text")
