@@ -39,16 +39,14 @@ chrome_options = Options()
 chrome_options.add_argument("--headless")  # Remove this option for debugging
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--blink-settings=imagesEnabled=false")
-# Uncomment if JavaScript needs to be enabled to load elements
-# chrome_options.add_argument("--disable-javascript")
+chrome_options.add_experimental_option("prefs", {"profile.managed_default_content_settings.javascript": 2})  # Disable JavaScript
 
 # Base URL pattern for room pages on Jabama
 base_url = "https://www.jabama.com/stay/apartment-"
 
 # Define the range of page numbers you want to scrape
-start_page = 237225
-end_page = 737227
+start_page = 103371
+end_page = 105371
 
 # Function to scrape a single page
 def scrape_page(driver, page_num):
@@ -64,7 +62,6 @@ def scrape_page(driver, page_num):
     except TimeoutException:
         print(f"Timeout loading page {url}")
         return data
-
 
     # Extract location
     location = "N/A"
@@ -86,14 +83,12 @@ def scrape_page(driver, page_num):
         print(f"Room type element not found on page {page_num}")
 
     # Scroll the page to load all comments
-    for _ in range(3):  # Adjust the number of scrolls as needed
+    for _ in range(5):  # Adjust the number of scrolls as needed
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # Wait for content to load
+        time.sleep(1)  # Wait for content to load
 
     # Extract comments
     comments_containers = driver.find_elements(By.CSS_SELECTOR, "div.comment-card__content p.comment-card__text")
-
-    # Print the total number of comment containers found
     print(f"Found {len(comments_containers)} comment containers on page {page_num}")
 
     for container in comments_containers:
@@ -116,8 +111,8 @@ def scrape_pages(driver, pages):
         all_data.extend(data)
     return all_data
 
-# Adjust this based on how many threads you want
-num_workers = 20
+# Adjust the number of threads to 30
+num_workers = 30
 pages_per_worker = (end_page - start_page + 1) // num_workers
 
 # Function to initialize WebDriver and scrape pages in a thread
